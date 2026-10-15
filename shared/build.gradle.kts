@@ -10,6 +10,7 @@ kotlin {
     
     sourceSets {
     	jvmMain.dependencies{
+	implementation(libs.sqlite.jdbc)
 	implementation(libs.jaudiotagger)
 	}	
         commonMain.dependencies {

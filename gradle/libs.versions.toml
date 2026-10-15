@@ -1,4 +1,5 @@
 [versions]
+sqlite-jdbc = "3.53.2.1"
 jaudiotagger = "3.0.1"
 androidx-lifecycle = "2.11.0"
 composeMultiplatform = "1.12.1"
@@ -8,6 +9,7 @@ kotlinx-coroutines = "1.11.0"
 material3 = "1.12.0-alpha03"
 
 [libraries]
+sqlite-jdbc = {module = "org.xerial:sqlite-jdbc", version.ref = "sqlite-jdbc"}
 jaudiotagger = {module = "net.jthink:jaudiotagger", version.ref = "jaudiotagger"}
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-testJunit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
