@@ -3,6 +3,7 @@ package io.github.jonathan3467.music.basedatos
 import io.github.jonathan3467.music.modelo.Album
 import io.github.jonathan3467.music.modelo.Performer
 import io.github.jonathan3467.music.modelo.Rola
+import io.github.jonathan3467.music.modelo.RolaDetallada
 import io.github.jonathan3467.music.modelo.TipoPerformer
 import java.sql.Connection
 import java.sql.ResultSet
@@ -91,6 +92,30 @@ class RepositorioJdbc : RepositorioMusica{
                 val rolas = mutableListOf<Rola>()
                 while (r.next()){
                     rolas.add(leerRola(r))
+                }
+                rolas
+            }
+        }
+
+    override fun todasLasRolasDetalladas(): List<RolaDetallada> =
+        conexion.prepareStatement(
+            "SELECT r.id_rola, r.id_performer, r.id_album, r.path, r.title, " +
+            "R.track, r.year, r.genre, p.name AS performer, a.name AS album " +
+            "FROM rolas r " +
+            "JOIN performers p ON p.id_performer = r.id_performer " +
+            "JOIN albums a ON a.id_album = r.id_album " +
+            "ORDER BY r.title COLLATE NOCASE"
+        ).use { sentencia ->
+            sentencia.executeQuery().use { r ->
+                val rolas = mutableListOf<RolaDetallada>()
+                while (r.next()){
+                    rolas.add(
+                        RolaDetallada(
+                            rola = leerRola(r),
+                            performer = r.getString("performer") ?: "",
+                            album = r.getString("album") ?: ""
+                        )
+                    )
                 }
                 rolas
             }

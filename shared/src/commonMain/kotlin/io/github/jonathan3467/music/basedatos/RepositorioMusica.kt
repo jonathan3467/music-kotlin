@@ -3,6 +3,7 @@ package io.github.jonathan3467.music.basedatos
 import io.github.jonathan3467.music.modelo.Album
 import io.github.jonathan3467.music.modelo.Performer
 import io.github.jonathan3467.music.modelo.Rola
+import io.github.jonathan3467.music.modelo.RolaDetallada
 import io.github.jonathan3467.music.modelo.TipoPerformer
 
 
@@ -32,6 +33,8 @@ interface RepositorioMusica {
     ): Rola
 
     fun todasLasRolas(): List<Rola>
+
+    fun todasLasRolasDetalladas(): List<RolaDetallada>
 
     fun vaciar()
 

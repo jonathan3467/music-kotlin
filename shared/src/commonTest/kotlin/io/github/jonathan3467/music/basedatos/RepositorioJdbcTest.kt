@@ -89,4 +89,16 @@ class RepositorioJdbcTest {
         }
         assertNull(repo.buscarPerformerPorNombre("Fantasma"))
     }
+
+    @Test
+    fun lasRolasDetalladasTraenLosNombres(){
+        val performer = repo.insertarPerformer("The Beatles")
+        val album = repo.insertarAlbum("Let It Be", "/musica/let-it-be",1970)
+        repo.insertarRola(performer.id, album.id, "/musica/let-it-be/get-back.mp3", "Get Back", 1, 1970, "Rock")
+
+        val detallada = repo.todasLasRolasDetalladas().single()
+        assertEquals("Get Back", detallada.rola.titulo)
+        assertEquals("The Beatles", detallada.performer)
+        assertEquals("Let It Be", detallada.album)
+    }
 }
