@@ -30,6 +30,10 @@ class ControladorPrincipal (
         estado = estado.copy(rolas = repo.todasLasRolasDetalladas())
     }
 
+    fun seleccionar(idRola: Long){
+        estado = estado.copy(idSeleccionada = idRola)
+    }
+
     fun minar(directorio: File){
         if (estado.minando) return
         estado = estado.copy(minando = true, mensaje = "Minando ${directorio.name}...")

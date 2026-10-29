@@ -30,7 +30,8 @@ fun main() {
         ) {
             PantallaPrincipal(
                 estado = controlador.estado,
-                alMinar = { elegirCarpeta(window)?.let { controlador.minar(it)}}
+                alMinar = { elegirCarpeta(window)?.let { controlador.minar(it)}},
+                alSeleccionar = controlador::seleccionar
             )
         }
     }
