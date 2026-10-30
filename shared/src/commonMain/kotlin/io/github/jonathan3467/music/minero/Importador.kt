@@ -18,7 +18,7 @@ class Importador (private val repo: RepositorioMusica){
         }
 
     private fun guardar (rola: RolaMinada){
-        val idPerformer = idDelPerformer(rola.interprete)
+        val idPerformer = repo.obtenerOCrearPerformer(rola.interprete).id
         val idAlbum = idDelAlbum(rola)
 
         repo.insertarRola(
@@ -31,11 +31,6 @@ class Importador (private val repo: RepositorioMusica){
             genero = rola.genero
         )
     }
-
-    // Si el performer ya existe usa su id, si no lo crea como unknown
-    private fun idDelPerformer(nombre: String): Long =
-        repo.buscarPerformerPorNombre(nombre)?.id
-            ?: repo.insertarPerformer(nombre).id
 
     //sin album va al 0 osea unknown, si no lo busca por nombre y carpeta o lo crea
     private fun idDelAlbum(rola: RolaMinada): Long{

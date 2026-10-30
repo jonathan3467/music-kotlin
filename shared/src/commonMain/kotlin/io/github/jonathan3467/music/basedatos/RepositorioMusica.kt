@@ -22,6 +22,18 @@ interface RepositorioMusica {
 
     fun insertarAlbum(nombre: String, ruta:String, year: Int): Album
 
+    fun buscarAlbumPorId(id: Long): Album?
+
+    //cambia los campos que se pueden editar de la rola como el performer el titulo, pista,años y genero
+    fun actualizarRola(rola: Rola)
+
+    //cambia el nombre y el año del album
+    fun actualizarAlbum(album: Album)
+
+    //regresa el performer con ese nombre, si no existe se crea como desconocido
+    fun obtenerOCrearPerformer(nombre: String): Performer =
+        buscarPerformerPorNombre(nombre) ?: insertarPerformer(nombre)
+
     fun insertarRola(
         idPerformer: Long,
         idAlbum: Long,

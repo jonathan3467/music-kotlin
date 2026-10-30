@@ -101,4 +101,39 @@ class RepositorioJdbcTest {
         assertEquals("The Beatles", detallada.performer)
         assertEquals("Let It Be", detallada.album)
     }
+
+    @Test
+    fun actualizaUnaRolaSinTocarLasDemas(){
+        val beatles = repo.insertarPerformer("The Beatles")
+        val juanes = repo.insertarPerformer("Juanes")
+        val rola = repo.insertarRola(beatles.id, Album.ID_DESCONOCIDO, "/a.mp3", "A Dios Le Pid", 0, 0, "")
+        val otra = repo.insertarRola(beatles.id, Album.ID_DESCONOCIDO, "/b.mp3", "Let It Be", 6, 1970, "Rock")
+        val corregida = rola.copy(
+            idPerformer = juanes.id,
+            titulo = "A Dios Le Pido",
+            pista = 1,
+            year = 2002,
+            genero = "Pop"
+        )
+        repo.actualizarRola(corregida)
+        val enBase = repo.todasLasRolas().associateBy { it.id }
+        assertEquals(corregida, enBase[rola.id])
+        assertEquals(otra, enBase[otra.id])
+    }
+
+    @Test
+    fun actualizaUnAlbum(){
+        val album = repo.insertarAlbum("Let It Bee", "/musica/let-it-be", 0)
+        repo.actualizarAlbum(album.copy(nombre = "Let It Be", year = 1970))
+        assertEquals(album.copy(nombre = "Let It Be", year = 1970), repo.buscarAlbumPorId(album.id))
+    }
+
+    @Test
+    fun obtenerOCrearReutilizaOCrea(){
+        val existente = repo.insertarPerformer("The Beatles")
+        assertEquals(existente, repo.obtenerOCrearPerformer("The Beatles"))
+
+        val nuevo = repo.obtenerOCrearPerformer("Juanes")
+        assertEquals(nuevo, repo.buscarPerformerPorNombre("Juanes"))
+    }
 }

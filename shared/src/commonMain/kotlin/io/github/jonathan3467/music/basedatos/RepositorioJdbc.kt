@@ -58,6 +58,42 @@ class RepositorioJdbc : RepositorioMusica{
         return Album(ultimoId(), ruta, nombre, year)
     }
 
+    override fun buscarAlbumPorId(id: Long): Album? =
+        conexion.prepareStatement(
+            "SELECT id_album, path, name, year FROM albums WHERE id_album = ?"
+        ).use { sentencia ->
+            sentencia.setLong(1,id)
+            sentencia.executeQuery().use { r ->
+                if (r.next()) leerAlbum(r) else null
+            }
+        }
+
+    override fun actualizarRola(rola: Rola) {
+        conexion.prepareStatement(
+            "UPDATE rolas SET id_performer = ?, title = ?, track = ?, year = ?, genre = ? " +
+            "WHERE id_rola = ?"
+        ).use { sentencia ->
+            sentencia.setLong(1,rola.idPerformer)
+            sentencia.setString(2,rola.titulo)
+            sentencia.setInt(3,rola.pista)
+            sentencia.setInt(4,rola.year)
+            sentencia.setString(5,rola.genero)
+            sentencia.setLong(6,rola.id)
+            sentencia.executeUpdate()
+        }
+    }
+
+    override fun actualizarAlbum(album: Album) {
+        conexion.prepareStatement(
+            "UPDATE albums SET name = ?, year = ? WHERE id_album = ?"
+        ).use { sentencia ->
+            sentencia.setString(1, album.nombre)
+            sentencia.setInt(2, album.year)
+            sentencia.setLong(3, album.id)
+            sentencia.executeUpdate()
+        }
+    }
+
     override fun insertarRola(
         idPerformer: Long,
         idAlbum: Long,
