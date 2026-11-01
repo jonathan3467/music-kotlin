@@ -7,7 +7,8 @@ data class EstadoPantalla(
     val rolas: List<RolaDetallada> = emptyList(),
     val minando: Boolean = false,
     val mensaje: String? = null,
-    val idSeleccionada: Long? = null
+    val idSeleccionada: Long? = null,
+    val dialogo: Dialogo? = null
 ){
     //la rola seleccionada
     val seleccionada: RolaDetallada?
