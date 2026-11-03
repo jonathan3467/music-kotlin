@@ -13,6 +13,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import io.github.jonathan3467.music.Controlador.AccionesPantalla
+import io.github.jonathan3467.music.Controlador.Dialogo
 import io.github.jonathan3467.music.Controlador.EstadoPantalla
 
 // que tan ancha es cada collumna: titulo, interprete,album,genero
@@ -24,15 +26,18 @@ private val COLOR_SELECCION = Color(0xFF4A3D1C)
 //la vista solo dibuja el estado y avisa cuando aprietan el boton
 @Composable
 fun PantallaPrincipal(estado: EstadoPantalla,
-                      alMinar: () -> Unit,
-                      alSeleccionar: (Long) -> Unit){
+                      acciones: AccionesPantalla,
+                      alMinar: () -> Unit
+){
 
     MaterialTheme(colorScheme = darkColorScheme()){
         Surface(Modifier.fillMaxSize()) {
             Row(Modifier.fillMaxSize()){
 
-                PamelLateral(
+                PanelLateral(
                     seleccionada = estado.seleccionada,
+                    alEditarRola = acciones::editarRolaSeleccionada,
+                    alEditarAlbum = acciones::editarAlbumSeleccionado,
                     modifier = Modifier.width(300.dp).fillMaxHeight()
                 )
 
@@ -62,11 +67,24 @@ fun PantallaPrincipal(estado: EstadoPantalla,
                                 detallada.rola.genero
                             ),
                             seleccionada = detallada.rola.id == estado.idSeleccionada,
-                            alHacerClic = { alSeleccionar(detallada.rola.id)}
+                            alHacerClic = { acciones.seleccionar(detallada.rola.id)}
                             )
                         }
                     }
                 }
+            }
+            when(val dialogo = estado.dialogo){
+                is Dialogo.EditarRola -> DialogoEditarRola(
+                    dialogo = dialogo,
+                    alGuardar = acciones::guardarRola,
+                    alCancelar = acciones::cerrarDialogo
+                )
+                is Dialogo.EditarAlbum -> DialogoEditarAlbum(
+                    dialogo = dialogo,
+                    alGuardar = acciones::guardarAlbum,
+                    alCancelar = acciones::cerrarDialogo
+                )
+                null -> {}
             }
         }
     }
