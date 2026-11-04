@@ -1,6 +1,8 @@
 package io.github.jonathan3467.music.basedatos
 
 import io.github.jonathan3467.music.modelo.Album
+import io.github.jonathan3467.music.modelo.Grupo
+import io.github.jonathan3467.music.modelo.Persona
 import io.github.jonathan3467.music.modelo.TipoPerformer
 import java.io.File
 import kotlin.io.path.createTempDirectory
@@ -135,5 +137,39 @@ class RepositorioJdbcTest {
 
         val nuevo = repo.obtenerOCrearPerformer("Juanes")
         assertEquals(nuevo, repo.buscarPerformerPorNombre("Juanes"))
+    }
+
+    @Test
+    fun actualizarUnPerformer(){
+        val performer = repo.insertarPerformer("Beatles")
+        repo.actualizarPerformer(performer.copy(nombre = "The Beatles", tipo = TipoPerformer.GRUPO))
+        assertEquals(
+            performer.copy(nombre = "The Beatles", tipo = TipoPerformer.GRUPO),
+            repo.buscarPerformerPorId(performer.id)
+        )
+    }
+
+    @Test
+    fun insertaActualizaYBorraUnaPersona(){
+        val ringo = repo.insertarPersona(Persona(0, "Ringo Starr", null, "1940-07-07", null))
+        assertEquals(ringo, repo.buscarPersona("Ringo Starr"))
+        val corregida = ringo.copy(nombreReal = "Richard Starkey")
+        repo.actualizarPersona(corregida)
+        assertEquals(corregida,repo.buscarPersona("Ringo Starr"))
+        repo.borrarPersona(ringo.id)
+        assertNull(repo.buscarPersona("Ringo Starr"))
+    }
+
+    @Test
+    fun insertaActualizaYBorraUnGrupo(){
+        val beatles = repo.insertarGrupo(Grupo(0, "The Beatles", "1960-01-01", null))
+        assertEquals(beatles, repo.buscarGrupo("The Beatles"))
+
+        val conFin = beatles.copy(fechaFin = "1970-04-10")
+        repo.actualizarGrupo(conFin)
+        assertEquals(conFin,repo.buscarGrupo("The Beatles"))
+
+        repo.borrarGrupo(beatles.id)
+        assertNull(repo.buscarGrupo("The Beatles"))
     }
 }

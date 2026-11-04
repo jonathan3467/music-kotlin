@@ -1,7 +1,9 @@
 package io.github.jonathan3467.music.basedatos
 
 import io.github.jonathan3467.music.modelo.Album
+import io.github.jonathan3467.music.modelo.Grupo
 import io.github.jonathan3467.music.modelo.Performer
+import io.github.jonathan3467.music.modelo.Persona
 import io.github.jonathan3467.music.modelo.Rola
 import io.github.jonathan3467.music.modelo.RolaDetallada
 import io.github.jonathan3467.music.modelo.TipoPerformer
@@ -23,6 +25,126 @@ class RepositorioJdbc : RepositorioMusica{
                 if (r.next()) leerPerformer(r) else null
             }
         }
+
+    override fun buscarPerformerPorId(id: Long): Performer? =
+        conexion.prepareStatement(
+            "SELECT id_performer, id_type, name FROM performers WHERE id_performer = ?"
+        ).use { sentencia ->
+            sentencia.setLong(1, id)
+            sentencia.executeQuery().use { r ->
+                if (r.next()) leerPerformer(r) else null
+            }
+        }
+
+    override fun actualizarPerformer(performer: Performer) {
+        conexion.prepareStatement(
+            "UPDATE performers SET id_type = ?, name = ? WHERE id_performer = ?"
+        ).use { sentencia ->
+            sentencia.setInt(1,performer.tipo.id)
+            sentencia.setString(2,performer.nombre)
+            sentencia.setLong(3,performer.id)
+            sentencia.executeUpdate()
+        }
+    }
+
+    override fun insertarPersona(persona: Persona): Persona {
+        conexion.prepareStatement(
+            "INSERT INTO persons (stage_name, real_name, birth_date, death_date) VALUES (?, ?, ?, ?)"
+        ).use { sentencia ->
+            sentencia.setString(1, persona.nombreArtistico)
+            sentencia.setString(2, persona.nombreReal)
+            sentencia.setString(3, persona.fechaNacimiento)
+            sentencia.setString(4, persona.fechaMuerte)
+            sentencia.executeUpdate()
+        }
+        return persona.copy(id = ultimoId())
+    }
+
+    override fun buscarPersona(nombreArtistico: String): Persona? =
+        conexion.prepareStatement(
+            "SELECT id_person, stage_name, real_name, birth_date, death_date " +
+            "FROM persons WHERE stage_name = ?"
+        ).use { sentencia ->
+            sentencia.setString(1, nombreArtistico)
+            sentencia.executeQuery().use { r ->
+                if (r.next()) leerPersona(r) else null
+            }
+        }
+
+    override fun actualizarPersona(persona: Persona) {
+        conexion.prepareStatement(
+            "UPDATE persons SET stage_name = ?, real_name = ?, birth_date = ?, death_date = ?" +
+            "WHERE id_person = ?"
+        ).use { sentencia ->
+            sentencia.setString(1, persona.nombreArtistico)
+            sentencia.setString(2,persona.nombreReal)
+            sentencia.setString(3, persona.fechaNacimiento)
+            sentencia.setString(4, persona.fechaMuerte)
+            sentencia.setLong(5, persona.id)
+            sentencia.executeUpdate()
+        }
+    }
+
+    override fun borrarPersona(id: Long) {
+        enTransaccion {
+            // primero en los grupos, que apuntan a la persona (llave foranea)
+        conexion.prepareStatement("DELETE FROM in_group WHERE id_person = ?").use {
+            it.setLong(1,id)
+            it.executeUpdate()
+        }
+            conexion.prepareStatement("DELETE FROM persons WHERE id_person = ?").use {
+                it.setLong(1, id)
+                it.executeUpdate()
+            }
+        }
+    }
+
+    override fun buscarGrupo(nombre: String): Grupo? =
+        conexion.prepareStatement(
+            "SELECT id_group, name, start_date, end_date FROM groups WHERE name = ?"
+        ).use { sentencia ->
+            sentencia.setString(1,nombre)
+            sentencia.executeQuery().use { r->
+                if (r.next()) leerGrupo(r) else null
+            }
+        }
+
+    override fun insertarGrupo(grupo: Grupo): Grupo {
+        conexion.prepareStatement(
+            "INSERT INTO groups (name, start_date, end_date) VALUES (?, ?, ?)"
+        ).use { sentencia ->
+            sentencia.setString(1, grupo.nombre)
+            sentencia.setString(2, grupo.fechaInicio)
+            sentencia.setString(3, grupo.fechaFin)
+            sentencia.executeUpdate()
+        }
+        return grupo.copy(id = ultimoId())
+    }
+
+    override fun actualizarGrupo(grupo: Grupo) {
+        conexion.prepareStatement(
+            "UPDATE groups SET name = ?, start_date = ?, end_date = ? WHERE id_group = ?"
+        ).use { sentencia ->
+            sentencia.setString(1, grupo.nombre)
+            sentencia.setString(2, grupo.fechaInicio)
+            sentencia.setString(3, grupo.fechaFin)
+            sentencia.setLong(4, grupo.id)
+            sentencia.executeUpdate()
+        }
+    }
+
+    override fun borrarGrupo(id: Long) {
+        enTransaccion {
+            conexion.prepareStatement("DELETE FROM in_group WHERE id_group = ?").use {
+                it.setLong(1, id)
+                it.executeUpdate()
+            }
+            conexion.prepareStatement("DELETE FROM groups WHERE id_group = ?").use {
+                it.setLong(1, id)
+                it.executeUpdate()
+            }
+        }
+    }
 
     override fun insertarPerformer(nombre: String, tipo: TipoPerformer): Performer {
         conexion.prepareStatement(
@@ -223,5 +345,20 @@ class RepositorioJdbc : RepositorioMusica{
         pista = r.getInt("track"),
         year = r.getInt("year"),
         genero = r.getString("genre") ?: ""
+    )
+
+    private fun leerPersona(r: ResultSet) = Persona(
+        id = r.getLong("id_person"),
+        nombreArtistico = r.getString("stage_name") ?: "",
+        nombreReal = r.getString("real_name"),
+        fechaNacimiento = r.getString("birth_date"),
+        fechaMuerte = r.getString("death_date")
+    )
+
+    private fun leerGrupo(r: ResultSet) = Grupo(
+        id = r.getLong("id_group"),
+        nombre = r.getString("name") ?: "",
+        fechaInicio = r.getString("start_date"),
+        fechaFin = r.getString("end_date")
     )
 }

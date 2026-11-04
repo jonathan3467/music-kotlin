@@ -1,7 +1,9 @@
 package io.github.jonathan3467.music.basedatos
 
 import io.github.jonathan3467.music.modelo.Album
+import io.github.jonathan3467.music.modelo.Grupo
 import io.github.jonathan3467.music.modelo.Performer
+import io.github.jonathan3467.music.modelo.Persona
 import io.github.jonathan3467.music.modelo.Rola
 import io.github.jonathan3467.music.modelo.RolaDetallada
 import io.github.jonathan3467.music.modelo.TipoPerformer
@@ -11,6 +13,31 @@ import io.github.jonathan3467.music.modelo.TipoPerformer
 interface RepositorioMusica {
 
     fun buscarPerformerPorNombre(nombre: String): Performer?
+
+    fun buscarPerformerPorId(id: Long): Performer?
+
+    //cambia el nombre y el ripo del performer
+    fun actualizarPerformer(performer: Performer)
+
+    fun buscarPersona(nombreArtistico: String): Persona?
+
+    //inserta la persiona (el id se ignora) y la regresa con su id real
+    fun insertarPersona(persona: Persona): Persona
+
+    fun actualizarPersona(persona: Persona)
+
+    //borra la persona y en los grupos tambien se borra a esa persona
+    fun borrarPersona(id: Long)
+
+    fun buscarGrupo(nombre: String): Grupo?
+
+    // Inserta al grupo(el id se ignora) y lo regresa con su id real
+    fun insertarGrupo(grupo: Grupo): Grupo
+
+    fun actualizarGrupo(grupo: Grupo)
+
+    //borra el grupo y sus miembors(las personas se quedan)
+    fun borrarGrupo(id: Long)
 
     fun insertarPerformer(
         nombre: String,
