@@ -7,4 +7,6 @@ interface AccionesPantalla {
     fun guardarRola(formulario: FormularioRola)
     fun guardarAlbum(formulario: FormularioAlbum)
     fun cerrarDialogo()
+    fun editarPerformerSeleccionado()
+    fun guardarPerformer(formulario: FormularioPerformer)
 }

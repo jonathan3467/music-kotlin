@@ -7,7 +7,13 @@ import io.github.jonathan3467.music.Controlador.AccionesPantalla
 import io.github.jonathan3467.music.Controlador.Dialogo
 import io.github.jonathan3467.music.Controlador.EstadoPantalla
 import io.github.jonathan3467.music.Controlador.FormularioAlbum
+import io.github.jonathan3467.music.Controlador.FormularioPerformer
 import io.github.jonathan3467.music.Controlador.FormularioRola
+import io.github.jonathan3467.music.Controlador.oNulo
+import io.github.jonathan3467.music.basedatos.DatosGrupo
+import io.github.jonathan3467.music.basedatos.DatosPersona
+import io.github.jonathan3467.music.basedatos.EditorDePerformers
+import io.github.jonathan3467.music.basedatos.NombreRepetidoException
 import io.github.jonathan3467.music.basedatos.RepositorioMusica
 import io.github.jonathan3467.music.minero.Importador
 import io.github.jonathan3467.music.minero.Minero
@@ -25,6 +31,7 @@ class ControladorPrincipal (
 ) : AccionesPantalla {
     private val minero = Minero()
     private val importador = Importador(repo)
+    private val editor = EditorDePerformers(repo)
 
     //cuando cambia la vista se vuelve a dibujar
     var estado by mutableStateOf(EstadoPantalla())
@@ -95,6 +102,48 @@ class ControladorPrincipal (
                 year = formulario.year.trim().toInt()
             )
         )
+        recargar()
+    }
+
+    override fun editarPerformerSeleccionado() {
+        val seleccionado = estado.seleccionada ?: return
+        val performer = repo.buscarPerformerPorId(seleccionado.rola.idPerformer) ?: return
+        estado = estado.copy(
+            dialogo = Dialogo.EditarPerformer(
+                performer = performer,
+                persona = repo.buscarPersona(performer.nombre),
+                grupo = repo.buscarGrupo(performer.nombre)
+            )
+        )
+    }
+
+    override fun guardarPerformer(formulario: FormularioPerformer) {
+        val dialogo = estado.dialogo as? Dialogo.EditarPerformer ?: return
+        val error = formulario.error()
+        if (error != null){
+            estado = estado.copy(dialogo = dialogo.copy(error = error))
+            return
+        }
+
+        try {
+            editor.guardar(
+                idPerformer = dialogo.performer.id,
+                nombre = formulario.nombre.trim(),
+                tipo = formulario.tipo,
+                datosPersona = DatosPersona(
+                    nombreReal = formulario.nombreReal.oNulo(),
+                    nacimiento = formulario.nacimiento.oNulo(),
+                    muerte = formulario.muerte.oNulo()
+                ),
+                datosGrupo = DatosGrupo(
+                    inicio = formulario.inicio.oNulo(),
+                    fin = formulario.fin.oNulo()
+                )
+            )
+        } catch (e: NombreRepetidoException){
+            estado = estado.copy(dialogo = dialogo.copy(error = e.message))
+            return
+        }
         recargar()
     }
 

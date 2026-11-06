@@ -1,6 +1,9 @@
 package io.github.jonathan3467.music.Controlador
 
 import io.github.jonathan3467.music.modelo.Album
+import io.github.jonathan3467.music.modelo.Grupo
+import io.github.jonathan3467.music.modelo.Performer
+import io.github.jonathan3467.music.modelo.Persona
 import io.github.jonathan3467.music.modelo.RolaDetallada
 
 
@@ -13,6 +16,13 @@ sealed interface Dialogo{
 
     data class EditarAlbum(
         val album: Album,
+        val error: String? = null
+    ) : Dialogo
+
+    data class EditarPerformer(
+        val performer: Performer,
+        val persona: Persona?,
+        val grupo: Grupo?,
         val error: String? = null
     ) : Dialogo
 }

@@ -85,6 +85,7 @@ fun PantallaPrincipal(estado: EstadoPantalla,
                     alCancelar = acciones::cerrarDialogo
                 )
                 null -> {}
+                is Dialogo.EditarPerformer -> {}
             }
         }
     }
