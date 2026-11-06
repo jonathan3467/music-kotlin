@@ -157,6 +157,42 @@ class RepositorioJdbc : RepositorioMusica{
         return Performer(ultimoId(), tipo, nombre)
     }
 
+    override fun miembrosDe(idGrupo: Long): List<Persona> =
+        conexion.prepareStatement(
+            "SELECT p.id_person, p.stage_name, p.real_name, p.birth_date, p.death_date " +
+            "FROM in_group g JOIN persons p ON p.id_person = g.id_person " +
+            "WHERE g.id_group = ? ORDER BY p.stage_name COLLATE NOCASE"
+        ).use { sentencia ->
+            sentencia.setLong(1, idGrupo)
+            sentencia.executeQuery().use { r ->
+                val miembros = mutableListOf<Persona>()
+                while (r.next()){
+                    miembros.add(leerPersona(r))
+                }
+                miembros
+            }
+        }
+
+    override fun agregarMiembro(idPersona: Long, idGrupo: Long) {
+        conexion.prepareStatement(
+            "INSERT OR IGNORE INTO in_group (id_person, id_group) VALUES (?, ?)"
+        ).use { sentencia ->
+            sentencia.setLong(1, idPersona)
+            sentencia.setLong(2, idGrupo)
+            sentencia.executeUpdate()
+        }
+    }
+
+    override fun quitarMiembro(idPersona: Long, idGrupo: Long) {
+        conexion.prepareStatement(
+            "DELETE FROM in_group WHERE id_person = ? AND id_group = ?"
+        ).use { sentencia ->
+            sentencia.setLong(1, idPersona)
+            sentencia.setLong(2, idGrupo)
+            sentencia.executeUpdate()
+        }
+    }
+
     override fun buscarAlbum(nombre: String, ruta: String): Album? =
         conexion.prepareStatement(
             "SELECT id_album, path, name, year FROM albums WHERE name = ? AND path = ?"

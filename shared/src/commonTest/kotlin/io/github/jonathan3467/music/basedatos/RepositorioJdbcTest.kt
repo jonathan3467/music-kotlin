@@ -172,4 +172,47 @@ class RepositorioJdbcTest {
         repo.borrarGrupo(beatles.id)
         assertNull(repo.buscarGrupo("The Beatles"))
     }
+
+    @Test
+    fun agregarYQuitarMiembros(){
+        val beatles = repo.insertarGrupo(Grupo(0, "The Beatles", null, null))
+        val ringo = repo.insertarPersona(Persona(0, "Ringo Starr", null, null, null))
+        val john = repo.insertarPersona(Persona(0, "John Lennon", null, null, null))
+
+        repo.agregarMiembro(ringo.id, beatles.id)
+        repo.agregarMiembro(john.id, beatles.id)
+        repo.agregarMiembro(john.id, beatles.id)  // repetido se supone que no debe de pasar nada
+        assertEquals(listOf(john, ringo), repo.miembrosDe(beatles.id))
+        repo.quitarMiembro(ringo.id, beatles.id)
+        assertEquals(listOf(john), repo.miembrosDe(beatles.id))
+        assertNotNull(repo.buscarPersona("Ringo Starr")) // la persona sigue existiendo
+    }
+
+    @Test
+    fun borrarUnGrupoQuitaSusMiembrosPeroNoLasPersonas(){
+        val beatles = repo.insertarGrupo(Grupo(0, "The Beatles", null, null))
+        val ringo = repo.insertarPersona(Persona(0, "Ringo Starr", null, null, null))
+        repo.agregarMiembro(ringo.id, beatles.id)
+
+        repo.borrarGrupo(beatles.id)
+        assertTrue(repo.miembrosDe(beatles.id).isEmpty())
+        assertNotNull(repo.buscarPersona("Ringo Starr"))
+    }
+
+    @Test
+    fun borrarUnaPersonaLaQuitaDeSusGrupos(){
+        val beatles = repo.insertarGrupo(Grupo(0, "The Beatles", null, null))
+        val ringo = repo.insertarPersona(Persona(0, "Ringo Starr", null, null, null))
+        repo.agregarMiembro(ringo.id, beatles.id)
+        repo.borrarPersona(ringo.id)
+        assertTrue(repo.miembrosDe(beatles.id).isEmpty())
+    }
+
+    @Test
+    fun obtenerOCrearPersonaReutilizaOCrea(){
+        val ringo = repo.insertarPersona(Persona(0, "Ringo Starr", "Richar Starkey", null, null))
+        assertEquals(ringo, repo.buscarPersona("Ringo Starr"))
+        val paul = repo.obtenerOCrearPersona("Paul McCartney")
+        assertEquals(paul, repo.buscarPersona("Paul McCartney"))
+    }
 }

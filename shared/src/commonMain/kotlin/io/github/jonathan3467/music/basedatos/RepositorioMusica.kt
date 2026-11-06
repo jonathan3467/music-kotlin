@@ -44,6 +44,19 @@ interface RepositorioMusica {
         tipo: TipoPerformer = TipoPerformer.DESCONOCIDO
     ): Performer
 
+    // Las personas que son miembros del grupo en orden alfabetico
+    fun miembrosDe(idGrupo: Long): List<Persona>
+
+    // si la persona ya era miembro no pasa nada
+    fun agregarMiembro(idPersona: Long, idGrupo: Long)
+
+    fun quitarMiembro(idPersona: Long, idGrupo: Long)
+
+    //regresa la persona con ese nombre artistico si no existe la crea sin mas datos
+    fun obtenerOCrearPersona(nombreArtistico: String): Persona =
+        buscarPersona(nombreArtistico)
+            ?: insertarPersona(Persona(0, nombreArtistico, null, null, null))
+
     //un album se identifica por nombre y caprtea, dos artistas pueden tener un "los mejores exitos"
     fun buscarAlbum(nombre: String, ruta: String): Album?
 
