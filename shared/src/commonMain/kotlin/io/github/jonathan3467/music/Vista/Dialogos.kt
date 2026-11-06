@@ -10,7 +10,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.jonathan3467.music.Controlador.Dialogo
 import io.github.jonathan3467.music.Controlador.FormularioAlbum
+import io.github.jonathan3467.music.Controlador.FormularioPerformer
 import io.github.jonathan3467.music.Controlador.FormularioRola
+import io.github.jonathan3467.music.modelo.TipoPerformer
 
 @Composable
 fun DialogoEditarRola(
@@ -81,6 +83,73 @@ fun DialogoEditarAlbum(
             TextButton(onClick = alCancelar) { Text("Cancelar")}
         }
     )
+}
+
+@Composable
+fun DialogoEditarPerformer(
+    dialogo: Dialogo.EditarPerformer,
+    alGuardar: (FormularioPerformer) -> Unit,
+    alCancelar: () -> Unit
+){
+    val p = dialogo.performer
+    var nombre by remember(p) { mutableStateOf(p.nombre)}
+    var tipo by remember(p) {mutableStateOf(p.tipo)}
+    var nombreReal by remember(p) {mutableStateOf(dialogo.persona?.nombreReal ?: "")}
+    var nacimiento by remember(p) {mutableStateOf(dialogo.persona?.fechaNacimiento ?: "")}
+    var muerte by remember(p) {mutableStateOf(dialogo.persona?.fechaMuerte ?: "")}
+    var inicio by remember(p) {mutableStateOf(dialogo.grupo?.fechaInicio ?: "")}
+    var fin by remember(p) {mutableStateOf(dialogo.grupo?.fechaFin ?: "")}
+
+    AlertDialog(
+        onDismissRequest = alCancelar,
+        title = { Text("Editar interprete")},
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)){
+                Campo("Nombre", nombre) { nombre = it}
+
+                // un boton por tipo: el escogido se ve marcado
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)){
+                    TipoPerformer.entries.forEach { opcion ->
+                        FilterChip(
+                            selected = tipo == opcion,
+                            onClick = { tipo = opcion },
+                            label = { Text(etiquetaDe(opcion))}
+                        )
+                    }
+                }
+
+                //Los campos cambian segun el tipo escogido
+                when(tipo){
+                    TipoPerformer.PERSONA -> {
+                        Campo("Nombre real", nombreReal) { nombreReal = it }
+                        Campo("Nacimiento (AAAA-MM-DD)", nacimiento) { nacimiento = it }
+                        Campo("Muerte (AAAA-MM-DD)", muerte) { muerte = it }
+                    }
+                    TipoPerformer.GRUPO -> {
+                        Campo("Inicio (AAAA-MM-DD)", inicio) { inicio = it }
+                        Campo("Fin (AAAA-MM-DD)", fin) { fin = it }
+                    }
+                    TipoPerformer.DESCONOCIDO -> {}
+                }
+
+                MensajeDeError(dialogo.error)
+            }
+        },
+        confirmButton = {
+            Button(onClick = {
+                alGuardar(FormularioPerformer(nombre, tipo, nombreReal, nacimiento, muerte, inicio, fin))
+            }) { Text("Guardar")}
+        },
+        dismissButton = {
+            TextButton(onClick = alCancelar) { Text("Cancelar") }
+        }
+    )
+}
+
+private fun etiquetaDe(tipo: TipoPerformer): String = when(tipo){
+    TipoPerformer.PERSONA -> "Persona"
+    TipoPerformer.GRUPO -> "Grupo"
+    TipoPerformer.DESCONOCIDO -> "Desconocido"
 }
 
 @Composable

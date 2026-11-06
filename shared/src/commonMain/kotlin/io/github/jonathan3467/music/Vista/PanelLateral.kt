@@ -20,6 +20,7 @@ import io.github.jonathan3467.music.modelo.RolaDetallada
 fun PanelLateral(seleccionada: RolaDetallada?,
                  alEditarRola: () -> Unit,
                  alEditarAlbum: () -> Unit,
+                 alEditarPerformer: () -> Unit,
                  modifier: Modifier = Modifier
 ){
     Column(modifier.padding(16.dp)) {
@@ -30,7 +31,7 @@ fun PanelLateral(seleccionada: RolaDetallada?,
             )
         } else {
             Dato("Rola", seleccionada.rola.titulo,alEditarRola)
-            Dato("Interprete", seleccionada.performer)
+            Dato("Interprete", seleccionada.performer, alEditarPerformer)
             Dato("Album", seleccionada.album, alEditarAlbum)
             HorizontalDivider(Modifier.padding(vertical = 8.dp))
             Dato("Pista", numeroOGuion(seleccionada.rola.pista))

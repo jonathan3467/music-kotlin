@@ -38,6 +38,7 @@ fun PantallaPrincipal(estado: EstadoPantalla,
                     seleccionada = estado.seleccionada,
                     alEditarRola = acciones::editarRolaSeleccionada,
                     alEditarAlbum = acciones::editarAlbumSeleccionado,
+                    alEditarPerformer = acciones::editarPerformerSeleccionado,
                     modifier = Modifier.width(300.dp).fillMaxHeight()
                 )
 
@@ -85,7 +86,11 @@ fun PantallaPrincipal(estado: EstadoPantalla,
                     alCancelar = acciones::cerrarDialogo
                 )
                 null -> {}
-                is Dialogo.EditarPerformer -> {}
+                is Dialogo.EditarPerformer -> DialogoEditarPerformer(
+                    dialogo = dialogo,
+                    alGuardar = acciones::guardarPerformer,
+                    alCancelar = acciones::cerrarDialogo
+                )
             }
         }
     }
