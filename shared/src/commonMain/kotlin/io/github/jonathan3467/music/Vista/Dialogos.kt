@@ -6,11 +6,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.jonathan3467.music.Controlador.Dialogo
 import io.github.jonathan3467.music.Controlador.FormularioAlbum
 import io.github.jonathan3467.music.Controlador.FormularioPerformer
+import io.github.jonathan3467.music.Controlador.FormularioPersona
 import io.github.jonathan3467.music.Controlador.FormularioRola
 import io.github.jonathan3467.music.modelo.TipoPerformer
 
@@ -89,6 +91,7 @@ fun DialogoEditarAlbum(
 fun DialogoEditarPerformer(
     dialogo: Dialogo.EditarPerformer,
     alGuardar: (FormularioPerformer) -> Unit,
+    alVerMiembros: () -> Unit,
     alCancelar: () -> Unit
 ){
     val p = dialogo.performer
@@ -128,6 +131,15 @@ fun DialogoEditarPerformer(
                     TipoPerformer.GRUPO -> {
                         Campo("Inicio (AAAA-MM-DD)", inicio) { inicio = it }
                         Campo("Fin (AAAA-MM-DD)", fin) { fin = it }
+                        if (dialogo.grupo != null && p.tipo == TipoPerformer.GRUPO){
+                            OutlinedButton(onClick = alVerMiembros) { Text("Miembros...")}
+                        } else {
+                            Text(
+                                "Guardar primero como grupo para poder agregar miembros",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                     TipoPerformer.DESCONOCIDO -> {}
                 }
@@ -138,6 +150,86 @@ fun DialogoEditarPerformer(
         confirmButton = {
             Button(onClick = {
                 alGuardar(FormularioPerformer(nombre, tipo, nombreReal, nacimiento, muerte, inicio, fin))
+            }) { Text("Guardar")}
+        },
+        dismissButton = {
+            TextButton(onClick = alCancelar) { Text("Cancelar") }
+        }
+    )
+}
+
+@Composable
+fun DialogoMiembros(
+    dialogo: Dialogo.Miembros,
+    alAgregar: (String) -> Unit,
+    alQuitar: (Long) -> Unit,
+    alCerrar: () -> Unit
+){
+    var nombre by remember(dialogo.grupo) { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = alCerrar,
+        title = { Text("Miembros de ${dialogo.grupo.nombre}")},
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)){
+                if (dialogo.miembros.isEmpty()){
+                    Text("Este grupo todavia no tiene miembros",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                dialogo.miembros.forEach { persona ->
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically){
+                        Text(persona.nombreArtistico, Modifier.weight(1f))
+                        TextButton(onClick = { alQuitar(persona.id) }) { Text("Quitar") }
+                    }
+                }
+
+                HorizontalDivider()
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ){
+                    Campo("Nombre de la persona", nombre, Modifier.weight(1f)){ nombre = it }
+                    Button(onClick = {
+                        alAgregar(nombre)
+                        nombre = ""
+                    }) { Text("Agregar") }
+                }
+                MensajeDeError(dialogo.error)
+            }
+        },
+        confirmButton = {
+            Button(onClick = alCerrar) { Text("Listo") }
+        }
+    )
+}
+
+@Composable
+fun DialogoNuevaPersona(
+    dialogo: Dialogo.NuevaPersona,
+    alGuardar: (FormularioPersona) -> Unit,
+    alCancelar: () -> Unit
+){
+    var nombre by remember { mutableStateOf("") }
+    var nombreReal by remember { mutableStateOf("") }
+    var nacimiento by remember { mutableStateOf("") }
+    var muerte by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = alCancelar,
+        title = { Text("Nueva Persona") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)){
+                Campo("Nombre artistico", nombre) { nombre = it }
+                Campo("Nombre real", nombreReal) { nombreReal = it }
+                Campo("Nacimiento (AAAA-MM-DD)", nacimiento) {nacimiento = it }
+                Campo("Muerte (AAAA-MM-DD)", muerte) { muerte = it }
+                MensajeDeError(dialogo.error)
+            }
+        },
+        confirmButton = {
+            Button(onClick = {
+                alGuardar(FormularioPersona(nombre, nombreReal, nacimiento, muerte))
             }) { Text("Guardar")}
         },
         dismissButton = {

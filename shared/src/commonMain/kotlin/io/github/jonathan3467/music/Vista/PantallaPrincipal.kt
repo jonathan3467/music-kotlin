@@ -50,6 +50,10 @@ fun PantallaPrincipal(estado: EstadoPantalla,
                     Button(onClick = alMinar, enabled = !estado.minando) {
                         Text("Minar carpeta...")
                     }
+                    Spacer(Modifier.width(8.dp))
+                    OutlinedButton(onClick = acciones::nuevaPersona){
+                        Text("Nueva persona...")
+                    }
                     Spacer(Modifier.width(16.dp))
                     Text(estado.mensaje ?: "${estado.rolas.size} rolas")
                 }
@@ -89,10 +93,20 @@ fun PantallaPrincipal(estado: EstadoPantalla,
                 is Dialogo.EditarPerformer -> DialogoEditarPerformer(
                     dialogo = dialogo,
                     alGuardar = acciones::guardarPerformer,
+                    alVerMiembros = acciones::verMiembros,
                     alCancelar = acciones::cerrarDialogo
                 )
-                is Dialogo.Miembros -> {}
-                is Dialogo.NuevaPersona -> {}
+                is Dialogo.Miembros -> DialogoMiembros(
+                    dialogo = dialogo,
+                    alAgregar = acciones::agregarMiembro,
+                    alQuitar = acciones::quitarMiembro,
+                    alCerrar = acciones::cerrarDialogo
+                )
+                is Dialogo.NuevaPersona -> DialogoNuevaPersona(
+                    dialogo = dialogo,
+                    alGuardar = acciones::guardarNuevaPersona,
+                    alCancelar = acciones::cerrarDialogo
+                )
             }
         }
     }
