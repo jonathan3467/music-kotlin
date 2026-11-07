@@ -9,4 +9,9 @@ interface AccionesPantalla {
     fun cerrarDialogo()
     fun editarPerformerSeleccionado()
     fun guardarPerformer(formulario: FormularioPerformer)
+    fun verMiembros()
+    fun agregarMiembro(nombre: String)
+    fun quitarMiembro(idPersona: Long)
+    fun nuevaPersona()
+    fun guardarNuevaPersona(formulario: FormularioPersona)
 }

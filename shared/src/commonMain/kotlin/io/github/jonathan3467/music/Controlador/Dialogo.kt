@@ -25,4 +25,14 @@ sealed interface Dialogo{
         val grupo: Grupo?,
         val error: String? = null
     ) : Dialogo
+
+    data class Miembros(
+        val grupo: Grupo,
+        val miembros: List<Persona>,
+        val error: String? = null
+    ) : Dialogo
+
+    data class NuevaPersona(
+        val error: String? = null
+    ) : Dialogo
 }

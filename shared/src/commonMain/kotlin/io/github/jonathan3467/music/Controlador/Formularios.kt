@@ -50,6 +50,17 @@ data class FormularioPerformer(
     }
 }
 
+data class FormularioPersona(
+    val nombre: String,
+    val nombreReal: String = "",
+    val nacimiento: String = "",
+    val muerte: String = ""
+){
+    fun error(): String? =
+        if (nombre.isBlank()) "El nombre no puede quedar vacio"
+    else errorDeFechas(nacimiento,muerte, "nacimiento", "muerte")
+}
+
 //un numero entero que no sea negativo
 private fun esNumeroValido(texto: String): Boolean =
     (texto.trim().toIntOrNull() ?: -1) >= 0

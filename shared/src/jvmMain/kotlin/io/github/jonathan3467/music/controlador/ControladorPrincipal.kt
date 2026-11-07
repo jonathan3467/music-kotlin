@@ -8,6 +8,7 @@ import io.github.jonathan3467.music.Controlador.Dialogo
 import io.github.jonathan3467.music.Controlador.EstadoPantalla
 import io.github.jonathan3467.music.Controlador.FormularioAlbum
 import io.github.jonathan3467.music.Controlador.FormularioPerformer
+import io.github.jonathan3467.music.Controlador.FormularioPersona
 import io.github.jonathan3467.music.Controlador.FormularioRola
 import io.github.jonathan3467.music.Controlador.oNulo
 import io.github.jonathan3467.music.basedatos.DatosGrupo
@@ -18,6 +19,7 @@ import io.github.jonathan3467.music.basedatos.RepositorioMusica
 import io.github.jonathan3467.music.minero.Importador
 import io.github.jonathan3467.music.minero.Minero
 import io.github.jonathan3467.music.modelo.Album
+import io.github.jonathan3467.music.modelo.Persona
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -145,6 +147,66 @@ class ControladorPrincipal (
             return
         }
         recargar()
+    }
+
+    override fun verMiembros() {
+        val dialogo = estado.dialogo as? Dialogo.EditarPerformer ?: return
+        val grupo = dialogo.grupo ?: return
+        estado = estado.copy(dialogo = Dialogo.Miembros(grupo, repo.miembrosDe(grupo.id)))
+    }
+
+    override fun agregarMiembro(nombre: String) {
+        val dialogo = estado.dialogo as? Dialogo.Miembros ?: return
+        val limpio = nombre.trim()
+        if (limpio.isEmpty()){
+            estado = estado.copy(dialogo = dialogo.copy(error = "Escribe el nombre de la persona"))
+            return
+        }
+
+        repo.enTransaccion {
+            val persona = repo.obtenerOCrearPersona(limpio)
+            repo.agregarMiembro(persona.id, dialogo.grupo.id)
+        }
+        actualizarMiembros(dialogo)
+    }
+
+    override fun quitarMiembro(idPersona: Long) {
+        val dialogo = estado.dialogo as? Dialogo.Miembros ?: return
+        repo.quitarMiembro(idPersona, dialogo.grupo.id)
+        actualizarMiembros(dialogo)
+    }
+
+    override fun nuevaPersona() {
+        estado = estado.copy(dialogo = Dialogo.NuevaPersona())
+    }
+
+    override fun guardarNuevaPersona(formulario: FormularioPersona) {
+        val dialogo = estado.dialogo as?  Dialogo.NuevaPersona ?: return
+        val nombre = formulario.nombre.trim()
+        val error = formulario.error()
+            ?: if (repo.buscarPersona(nombre) != null) "Ya existe una persona llamada \"$nombre\"" else null
+        if (error != null){
+            estado = estado.copy(dialogo = dialogo.copy(error = error))
+            return
+        }
+
+        repo.insertarPersona(
+            Persona(
+                id = 0,
+                nombreArtistico = nombre,
+                nombreReal = formulario.nombreReal.oNulo(),
+                fechaNacimiento = formulario.nacimiento.oNulo(),
+                fechaMuerte = formulario.muerte.oNulo()
+            )
+        )
+        estado = estado.copy(dialogo = null, mensaje = "Se agrego a $nombre")
+    }
+
+    //vuelve a leer los miembros para que el dialogo muestre la lista nueva
+    private fun actualizarMiembros(dialogo: Dialogo.Miembros){
+        estado = estado.copy(
+            dialogo = dialogo.copy(miembros = repo.miembrosDe(dialogo.grupo.id), error = null)
+        )
     }
 
     // vuelve a leer las rolas y cierra el dialogo

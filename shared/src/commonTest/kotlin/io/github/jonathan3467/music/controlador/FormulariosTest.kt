@@ -2,6 +2,7 @@ package io.github.jonathan3467.music.controlador
 
 import io.github.jonathan3467.music.Controlador.FormularioAlbum
 import io.github.jonathan3467.music.Controlador.FormularioPerformer
+import io.github.jonathan3467.music.Controlador.FormularioPersona
 import io.github.jonathan3467.music.Controlador.FormularioRola
 import io.github.jonathan3467.music.Controlador.esFechaValida
 import io.github.jonathan3467.music.modelo.TipoPerformer
@@ -70,5 +71,16 @@ class FormulariosTest {
     fun siEsDesconocidoNoSeRevisanFechas(){
         val f = FormularioPerformer("alguien", TipoPerformer.DESCONOCIDO, inicio = "basura")
         assertNull(f.error())
+    }
+
+    @Test
+    fun unaPersonaNuevaNecesitaNombre(){
+        assertNotNull(FormularioPersona("  ").error())
+    }
+
+    @Test
+    fun unaPersonaNuevaRevisaSusFechas(){
+        assertNotNull(FormularioPersona("Ringo Starr", nacimiento = "1940-07-32").error())
+        assertNull(FormularioPersona("Ringo Starr", nacimiento = "1940-07-07").error())
     }
 }

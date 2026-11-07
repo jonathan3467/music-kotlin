@@ -91,6 +91,8 @@ fun PantallaPrincipal(estado: EstadoPantalla,
                     alGuardar = acciones::guardarPerformer,
                     alCancelar = acciones::cerrarDialogo
                 )
+                is Dialogo.Miembros -> {}
+                is Dialogo.NuevaPersona -> {}
             }
         }
     }
