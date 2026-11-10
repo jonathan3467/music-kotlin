@@ -1,5 +1,6 @@
 package io.github.jonathan3467.music.basedatos
 
+import io.github.jonathan3467.music.Compilador.ConsultaSql
 import io.github.jonathan3467.music.modelo.Album
 import io.github.jonathan3467.music.modelo.Grupo
 import io.github.jonathan3467.music.modelo.Performer
@@ -9,6 +10,16 @@ import io.github.jonathan3467.music.modelo.RolaDetallada
 import io.github.jonathan3467.music.modelo.TipoPerformer
 import java.sql.Connection
 import java.sql.ResultSet
+
+//las rolas con el nombre de su performer y de su album, los apodos r, p, y a los usa el compilador
+private const val SELECT_DETALLADAS =
+    "SELECT r.id_rola, r.id_performer, r.id_album, r.path, r.title, " +
+            "r.track, r.year, r.genre, p.name AS performer, a.name AS album " +
+            "FROM rolas r " +
+            "JOIN performers p ON p.id_performer = r.id_performer " +
+            "JOIN albums a ON a.id_album = r.id_album "
+
+private const val ORDEN_POR_TITULO = "ORDER BY r.title COLLATE NOCASE"
 
 class RepositorioJdbc : RepositorioMusica{
 
@@ -292,28 +303,13 @@ class RepositorioJdbc : RepositorioMusica{
         }
 
     override fun todasLasRolasDetalladas(): List<RolaDetallada> =
-        conexion.prepareStatement(
-            "SELECT r.id_rola, r.id_performer, r.id_album, r.path, r.title, " +
-            "R.track, r.year, r.genre, p.name AS performer, a.name AS album " +
-            "FROM rolas r " +
-            "JOIN performers p ON p.id_performer = r.id_performer " +
-            "JOIN albums a ON a.id_album = r.id_album " +
-            "ORDER BY r.title COLLATE NOCASE"
-        ).use { sentencia ->
-            sentencia.executeQuery().use { r ->
-                val rolas = mutableListOf<RolaDetallada>()
-                while (r.next()){
-                    rolas.add(
-                        RolaDetallada(
-                            rola = leerRola(r),
-                            performer = r.getString("performer") ?: "",
-                            album = r.getString("album") ?: ""
-                        )
-                    )
-                }
-                rolas
-            }
-        }
+        leerDetalladas(SELECT_DETALLADAS + ORDEN_POR_TITULO, emptyList())
+
+    override fun buscarRolas(consulta: ConsultaSql): List<RolaDetallada> =
+        leerDetalladas(
+            SELECT_DETALLADAS + "WHERE ${consulta.where} " + ORDEN_POR_TITULO,
+            consulta.parametros
+        )
 
     override fun vaciar() {
         enTransaccion {
@@ -397,4 +393,29 @@ class RepositorioJdbc : RepositorioMusica{
         fechaInicio = r.getString("start_date"),
         fechaFin = r.getString("end_date")
     )
+
+    //ejecuta la consulta llenandpo cada ? con su parametro y lee las rolas detalladas
+    private fun leerDetalladas(sql: String, parametros: List<Any>): List<RolaDetallada> =
+        conexion.prepareStatement(sql).use { sentencia ->
+            parametros.forEachIndexed { indice, valor ->
+                when(valor){
+                    is String -> sentencia.setString(indice + 1, valor)
+                    is Int -> sentencia.setInt(indice + 1, valor)
+                    else -> error("Tipo de parametro no soportado: $valor")
+                }
+            }
+            sentencia.executeQuery().use { r ->
+                val rolas = mutableListOf<RolaDetallada>()
+                while (r.next()){
+                    rolas.add(
+                        RolaDetallada(
+                            rola = leerRola(r),
+                            performer = r.getString("performer") ?: "",
+                            album = r.getString("album") ?: ""
+                        )
+                    )
+                }
+                rolas
+            }
+        }
 }

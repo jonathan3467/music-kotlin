@@ -1,5 +1,6 @@
 package io.github.jonathan3467.music.basedatos
 
+import io.github.jonathan3467.music.Compilador.ConsultaSql
 import io.github.jonathan3467.music.modelo.Album
 import io.github.jonathan3467.music.modelo.Grupo
 import io.github.jonathan3467.music.modelo.Performer
@@ -92,4 +93,7 @@ interface RepositorioMusica {
 
     // se guarda todo o nada en una transaccion
     fun <T> enTransaccion(bloque: () -> T): T
+
+    // las rolas que cumplen la busqueda compilada en orden alfabetico
+    fun buscarRolas(consulta: ConsultaSql): List<RolaDetallada>
 }
