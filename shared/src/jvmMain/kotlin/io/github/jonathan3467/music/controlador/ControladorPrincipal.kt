@@ -3,6 +3,8 @@ package io.github.jonathan3467.music.controlador
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import io.github.jonathan3467.music.Compilador.ErrorDeSintaxis
+import io.github.jonathan3467.music.Compilador.compilarBusqueda
 import io.github.jonathan3467.music.Controlador.AccionesPantalla
 import io.github.jonathan3467.music.Controlador.Dialogo
 import io.github.jonathan3467.music.Controlador.EstadoPantalla
@@ -20,6 +22,7 @@ import io.github.jonathan3467.music.minero.Importador
 import io.github.jonathan3467.music.minero.Minero
 import io.github.jonathan3467.music.modelo.Album
 import io.github.jonathan3467.music.modelo.Persona
+import io.github.jonathan3467.music.modelo.RolaDetallada
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -202,6 +205,42 @@ class ControladorPrincipal (
         estado = estado.copy(dialogo = null, mensaje = "Se agrego a $nombre")
     }
 
+    override fun buscar(texto: String) {
+        if (texto.isBlank()){
+            limpiarBusqueda()
+            return
+        }
+        val consulta = try {
+            compilarBusqueda(texto)
+        } catch (e: ErrorDeSintaxis){
+            // la lista se queda como estaba, solo se muestra el error
+            estado = estado.copy(errorBusqueda = e.message)
+            return
+        }
+
+        val rolas = repo.buscarRolas(consulta)
+        estado = estado.copy(
+            rolas = rolas,
+            busqueda = texto,
+            errorBusqueda = null,
+            mensaje = if (rolas.size == 1) "1 rola encontrada" else "${rolas.size} rolas encontradas"
+        )
+    }
+
+    override fun limpiarBusqueda() {
+        estado = estado.copy(
+            rolas = repo.todasLasRolasDetalladas(),
+            busqueda = "",
+            errorBusqueda = null,
+            mensaje = null
+        )
+    }
+
+    // las rolas que se deben ver, todas o solo las de la busqueda activa
+    private fun rolasVisibles(): List<RolaDetallada> =
+        if (estado.busqueda.isBlank()) repo.todasLasRolasDetalladas()
+        else repo.buscarRolas(compilarBusqueda(estado.busqueda))
+
     //vuelve a leer los miembros para que el dialogo muestre la lista nueva
     private fun actualizarMiembros(dialogo: Dialogo.Miembros){
         estado = estado.copy(
@@ -211,7 +250,7 @@ class ControladorPrincipal (
 
     // vuelve a leer las rolas y cierra el dialogo
     private fun recargar(){
-        estado = estado.copy(rolas = repo.todasLasRolasDetalladas(), dialogo = null)
+        estado = estado.copy(rolas = rolasVisibles(), dialogo = null)
     }
 
     fun minar(directorio: File){

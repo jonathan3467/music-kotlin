@@ -8,7 +8,11 @@ data class EstadoPantalla(
     val minando: Boolean = false,
     val mensaje: String? = null,
     val idSeleccionada: Long? = null,
-    val dialogo: Dialogo? = null
+    val dialogo: Dialogo? = null,
+    //la busqueda activa, se vacia si se muestran todas las rolas
+    val busqueda: String = "",
+    //el error de la ultima busqueda si estaba mal escrita
+    val errorBusqueda: String? = null
 ){
     //la rola seleccionada
     val seleccionada: RolaDetallada?

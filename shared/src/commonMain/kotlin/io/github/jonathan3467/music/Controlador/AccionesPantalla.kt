@@ -14,4 +14,6 @@ interface AccionesPantalla {
     fun quitarMiembro(idPersona: Long)
     fun nuevaPersona()
     fun guardarNuevaPersona(formulario: FormularioPersona)
+    fun buscar(texto: String)
+    fun limpiarBusqueda()
 }
