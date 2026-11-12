@@ -58,10 +58,26 @@ fun PantallaPrincipal(estado: EstadoPantalla,
                     Text(estado.mensaje ?: "${estado.rolas.size} rolas")
                 }
 
+                Spacer(Modifier.height(12.dp))
+                BarraDeBusqueda(
+                    busquedaActual = estado.busqueda,
+                    error = estado.errorBusqueda,
+                    alBuscar = acciones::buscar,
+                    alLimpiar = acciones::limpiarBusqueda,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
                 Spacer(Modifier.height(16.dp))
                 Fila(listOf("Titulo", "Interprete", "Album", "Genero"), encabezado = true)
                 HorizontalDivider()
 
+                if (estado.rolas.isEmpty() && estado.busqueda.isNotBlank()){
+                    Text(
+                        "Ninguna rola coincide con la busqueda",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
                 LazyColumn(Modifier.fillMaxSize()) {
                     items(estado.rolas, key = { it.rola.id }) { detallada ->
                         Fila(
